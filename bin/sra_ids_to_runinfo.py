@@ -59,6 +59,8 @@ def fetch_url(url,encoding='utf-8'):
     if r.status_code != 200:
         print("ERROR: Connection failed\nError code '{}'".format(r.status_code))
         sys.exit(1)
+    if sys.version_info.major == 2:
+        return r.content.decode('utf8').encode('utf8').splitlines()
     return r.content.decode(encoding).splitlines()
 
 
