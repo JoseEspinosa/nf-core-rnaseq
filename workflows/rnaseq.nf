@@ -159,20 +159,28 @@ if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 def sortmerna_options           = modules['sortmerna']
 if (params.save_non_ribo_reads) { sortmerna_options.publish_files.put('fastq.gz','') }
 
-def stringtie_options   = modules['stringtie']
-stringtie_options.args += params.stringtie_ignore_gtf ? '' : Utils.joinModuleArgs(['-e'])
+def stringtie_annotate_options   = modules['stringtie']
+stringtie_annotate_options.args  += params.stringtie_ignore_gtf ? '' : Utils.joinModuleArgs(['-e'])
+
+def stringtie_merge_options   = modules['stringtie']
+// stringtie_merge_options.args  += params.stringtie_ignore_gtf ? '' : Utils.joinModuleArgs(['-e'])
+
+def stringtie_quantify_options   = modules['stringtie']
+stringtie_quantify_options.args  += Utils.joinModuleArgs(['-e'])
 
 def subread_featurecounts_options  = modules['subread_featurecounts']
 def biotype                        = params.gencode ? "gene_type" : params.featurecounts_group_type
 subread_featurecounts_options.args += Utils.joinModuleArgs(["-g $biotype", "-t $params.featurecounts_feature_type"])
 
-include { CAT_FASTQ             } from '../modules/nf-core/software/cat/fastq/main'             addParams( options: cat_fastq_options                            )
-include { SAMTOOLS_SORT         } from '../modules/nf-core/software/samtools/sort/main'         addParams( options: modules['umitools_dedup_transcriptome_sort'] )
-include { PRESEQ_LCEXTRAP       } from '../modules/nf-core/software/preseq/lcextrap/main'       addParams( options: modules['preseq_lcextrap']                   )
-include { QUALIMAP_RNASEQ       } from '../modules/nf-core/software/qualimap/rnaseq/main'       addParams( options: modules['qualimap_rnaseq']                   )
-include { SORTMERNA             } from '../modules/nf-core/software/sortmerna/main'             addParams( options: sortmerna_options                            )
-include { STRINGTIE             } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_options                            )
-include { SUBREAD_FEATURECOUNTS } from '../modules/nf-core/software/subread/featurecounts/main' addParams( options: subread_featurecounts_options                )
+include { CAT_FASTQ                       } from '../modules/nf-core/software/cat/fastq/main'             addParams( options: cat_fastq_options                            )
+include { SAMTOOLS_SORT                   } from '../modules/nf-core/software/samtools/sort/main'         addParams( options: modules['umitools_dedup_transcriptome_sort'] )
+include { PRESEQ_LCEXTRAP                 } from '../modules/nf-core/software/preseq/lcextrap/main'       addParams( options: modules['preseq_lcextrap']                   )
+include { QUALIMAP_RNASEQ                 } from '../modules/nf-core/software/qualimap/rnaseq/main'       addParams( options: modules['qualimap_rnaseq']                   )
+include { SORTMERNA                       } from '../modules/nf-core/software/sortmerna/main'             addParams( options: sortmerna_options                            )
+include { STRINGTIE as STRINGTIE_ANNOTATE } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_annotate_options                   )
+include { STRINGTIE_MERGE                 } from '../modules/local/stringtie_merge'                       addParams( options: stringtie_merge_options                      )
+include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_quantify_options                   )
+include { SUBREAD_FEATURECOUNTS           } from '../modules/nf-core/software/subread/featurecounts/main' addParams( options: subread_featurecounts_options                )
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -542,13 +550,28 @@ workflow RNASEQ {
 
     //
     // MODULE: STRINGTIE
+    // TODO CREATE a workflow similar to quantify salmon or bam_sort_samtools.nf
     //
     if (!params.skip_alignment && !params.skip_stringtie) {
-        STRINGTIE (
+        STRINGTIE_ANNOTATE (
             ch_genome_bam,
             PREPARE_GENOME.out.gtf
         )
-        ch_software_versions = ch_software_versions.mix(STRINGTIE.out.version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(STRINGTIE_ANNOTATE.out.version.first().ifEmpty(null))
+
+        STRINGTIE_MERGE (
+            // STRINGTIE_ANNOTATE.out.transcript_gtf.collect{it[1]},
+            STRINGTIE_ANNOTATE.out.transcript_gtf.collect{ meta, gtfs -> gtfs },
+        //     SALMON_QUANT.out.results.collect{it[1]},
+            PREPARE_GENOME.out.gtf
+        )
+
+        // STRINGTIE_ANNOTATE.out.transcript_gtf.collect{ meta, gtfs -> gtfs }.view()
+
+        STRINGTIE_QUANTIFY (
+            ch_genome_bam,
+            STRINGTIE_MERGE.out.annotation_gtf
+        )
     }
 
     //
