@@ -19,15 +19,15 @@ process STRINGTIE_MERGE {
     }
 
     input:
-    path (gtf_to_merge) //TODO check how this is done in other modules receiving a list of files (collect)
-    path  gtf
+    path gtf_to_merge //TODO check how this is done in other modules receiving a list of files (collect)
+    path gtf
 
     output:
-    path("test.annotation.gtf"), emit: annotation_gtf
+    path("new.annotation.gtf"), emit: annotation_gtf
     // tuple val(meta), path("*.transcripts.gtf"), emit: transcript_gtf
     // tuple val(meta), path("*.abundance.txt")  , emit: abundance
     // tuple val(meta), path("*.ballgown")       , emit: ballgown
-    path  "*.version.txt"                    , emit: version
+    path  "*.version.txt"     , emit: version
 
     script:
     def software = getSoftwareName(task.process)
@@ -35,7 +35,7 @@ process STRINGTIE_MERGE {
     stringtie --merge \\
         $gtf_to_merge \\
         -G $gtf \\
-        -o test.annotation.gtf \\
+        -o new.annotation.gtf \\
         $options.args
 
     stringtie --version > ${software}.version.txt
