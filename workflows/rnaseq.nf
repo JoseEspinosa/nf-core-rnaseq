@@ -168,6 +168,9 @@ def stringtie_merge_options   = modules['stringtie']
 def stringtie_quantify_options   = modules['stringtie']
 stringtie_quantify_options.args  += Utils.joinModuleArgs(['-e'])
 
+def feelnc_filter_options = modules['feelnc']
+def feelnc_codpot_options = modules['feelnc'] //TODO
+
 def subread_featurecounts_options  = modules['subread_featurecounts']
 def biotype                        = params.gencode ? "gene_type" : params.featurecounts_group_type
 subread_featurecounts_options.args += Utils.joinModuleArgs(["-g $biotype", "-t $params.featurecounts_feature_type"])
@@ -180,6 +183,8 @@ include { SORTMERNA                       } from '../modules/nf-core/software/so
 include { STRINGTIE as STRINGTIE_ANNOTATE } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_annotate_options                   )
 include { STRINGTIE_MERGE                 } from '../modules/local/stringtie_merge'                       addParams( options: stringtie_merge_options                      )
 include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_quantify_options                   )
+include { FEELNC_FILTER                   } from '../modules/local/feelnc_filter'                         addParams( options: feelnc_filter_options                        )
+include { FEELNC_CODPOT                   } from '../modules/local/feelnc_codpot'                         addParams( options: feelnc_codpot_options                        )
 include { SUBREAD_FEATURECOUNTS           } from '../modules/nf-core/software/subread/featurecounts/main' addParams( options: subread_featurecounts_options                )
 
 //
@@ -562,15 +567,26 @@ workflow RNASEQ {
         STRINGTIE_MERGE (
             // STRINGTIE_ANNOTATE.out.transcript_gtf.collect{it[1]},
             STRINGTIE_ANNOTATE.out.transcript_gtf.collect{ meta, gtfs -> gtfs },
-        //     SALMON_QUANT.out.results.collect{it[1]},
+            // SALMON_QUANT.out.results.collect{it[1]},
             PREPARE_GENOME.out.gtf
         )
-
-        // STRINGTIE_ANNOTATE.out.transcript_gtf.collect{ meta, gtfs -> gtfs }.view()
 
         STRINGTIE_QUANTIFY (
             ch_genome_bam,
             STRINGTIE_MERGE.out.annotation_gtf
+        )
+
+        // Feed with the result of stringtie merge
+        FEELNC_FILTER (
+            STRINGTIE_MERGE.out.annotation_gtf,
+            PREPARE_GENOME.out.gtf
+        )
+
+        // Compute the coding potential (CODPLOT) of candidate transcripts
+        FEELNC_CODPOT (
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gtf,
+            FEELNC_FILTER.out.lncrna_gtf // candidate lncrna transcripts
         )
     }
 
