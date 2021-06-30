@@ -159,14 +159,8 @@ if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 def sortmerna_options           = modules['sortmerna']
 if (params.save_non_ribo_reads) { sortmerna_options.publish_files.put('fastq.gz','') }
 
-def stringtie_annotate_options   = modules['stringtie']
+def stringtie_annotate_options   = modules['stringtie_annotate']
 stringtie_annotate_options.args  += params.stringtie_ignore_gtf ? '' : Utils.joinModuleArgs(['-e'])
-
-def stringtie_merge_options   = modules['stringtie']
-// stringtie_merge_options.args  += params.stringtie_ignore_gtf ? '' : Utils.joinModuleArgs(['-e'])
-
-def stringtie_quantify_options   = modules['stringtie']
-stringtie_quantify_options.args  += Utils.joinModuleArgs(['-e'])
 
 def subread_featurecounts_options  = modules['subread_featurecounts']
 def biotype                        = params.gencode ? "gene_type" : params.featurecounts_group_type
@@ -178,8 +172,8 @@ include { PRESEQ_LCEXTRAP                 } from '../modules/nf-core/software/pr
 include { QUALIMAP_RNASEQ                 } from '../modules/nf-core/software/qualimap/rnaseq/main'       addParams( options: modules['qualimap_rnaseq']                   )
 include { SORTMERNA                       } from '../modules/nf-core/software/sortmerna/main'             addParams( options: sortmerna_options                            )
 include { STRINGTIE as STRINGTIE_ANNOTATE } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_annotate_options                   )
-include { STRINGTIE_MERGE                 } from '../modules/local/stringtie_merge'                       addParams( options: stringtie_merge_options                      )
-include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_quantify_options                   )
+include { STRINGTIE_MERGE                 } from '../modules/local/stringtie_merge'                       addParams( options: modules['stringtie_merge']                   )
+include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: modules['stringtie_quantify']                )
 include { SUBREAD_FEATURECOUNTS           } from '../modules/nf-core/software/subread/featurecounts/main' addParams( options: subread_featurecounts_options                )
 
 //
@@ -567,7 +561,6 @@ workflow RNASEQ {
         )
 
         // STRINGTIE_ANNOTATE.out.transcript_gtf.collect{ meta, gtfs -> gtfs }.view()
-
         STRINGTIE_QUANTIFY (
             ch_genome_bam,
             STRINGTIE_MERGE.out.annotation_gtf

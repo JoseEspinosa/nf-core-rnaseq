@@ -24,9 +24,6 @@ process STRINGTIE_MERGE {
 
     output:
     path("new.annotation.gtf"), emit: annotation_gtf
-    // tuple val(meta), path("*.transcripts.gtf"), emit: transcript_gtf
-    // tuple val(meta), path("*.abundance.txt")  , emit: abundance
-    // tuple val(meta), path("*.ballgown")       , emit: ballgown
     path  "*.version.txt"     , emit: version
 
     script:
