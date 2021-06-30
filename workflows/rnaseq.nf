@@ -174,8 +174,8 @@ include { SORTMERNA                       } from '../modules/nf-core/software/so
 include { STRINGTIE as STRINGTIE_ANNOTATE } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_annotate_options                   )
 include { STRINGTIE_MERGE                 } from '../modules/local/stringtie_merge'                       addParams( options: modules['stringtie_merge']                   )
 include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: modules['stringtie_quantify']                )
-include { FEELNC_FILTER                   } from '../modules/local/feelnc_filter'                         addParams( options: feelnc_filter_options                        )
-include { FEELNC_CODPOT                   } from '../modules/local/feelnc_codpot'                         addParams( options: feelnc_codpot_options                        )
+include { FEELNC_FILTER                   } from '../modules/local/feelnc_filter'                         addParams( options: modules['feelnc_filter']                     )
+include { FEELNC_CODPOT                   } from '../modules/local/feelnc_codpot'                         addParams( options: modules['feelnc_codpot']                     )
 include { SUBREAD_FEATURECOUNTS           } from '../modules/nf-core/software/subread/featurecounts/main' addParams( options: subread_featurecounts_options                )
 
 //
