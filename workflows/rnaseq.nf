@@ -174,6 +174,8 @@ include { SORTMERNA                       } from '../modules/nf-core/software/so
 include { STRINGTIE as STRINGTIE_ANNOTATE } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_annotate_options                   )
 include { STRINGTIE_MERGE                 } from '../modules/local/stringtie_merge'                       addParams( options: modules['stringtie_merge']                   )
 include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: modules['stringtie_quantify']                )
+include { FEELNC_FILTER                   } from '../modules/local/feelnc_filter'                         addParams( options: feelnc_filter_options                        )
+include { FEELNC_CODPOT                   } from '../modules/local/feelnc_codpot'                         addParams( options: feelnc_codpot_options                        )
 include { SUBREAD_FEATURECOUNTS           } from '../modules/nf-core/software/subread/featurecounts/main' addParams( options: subread_featurecounts_options                )
 
 //
@@ -556,7 +558,7 @@ workflow RNASEQ {
         STRINGTIE_MERGE (
             // STRINGTIE_ANNOTATE.out.transcript_gtf.collect{it[1]},
             STRINGTIE_ANNOTATE.out.transcript_gtf.collect{ meta, gtfs -> gtfs },
-        //     SALMON_QUANT.out.results.collect{it[1]},
+            // SALMON_QUANT.out.results.collect{it[1]},
             PREPARE_GENOME.out.gtf
         )
 
@@ -564,6 +566,19 @@ workflow RNASEQ {
         STRINGTIE_QUANTIFY (
             ch_genome_bam,
             STRINGTIE_MERGE.out.annotation_gtf
+        )
+
+        // Feed with the result of stringtie merge
+        FEELNC_FILTER (
+            STRINGTIE_MERGE.out.annotation_gtf,
+            PREPARE_GENOME.out.gtf
+        )
+
+        // Compute the coding potential (CODPLOT) of candidate transcripts
+        FEELNC_CODPOT (
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gtf,
+            FEELNC_FILTER.out.lncrna_gtf // candidate lncrna transcripts
         )
     }
 
