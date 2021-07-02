@@ -568,18 +568,20 @@ workflow RNASEQ {
             STRINGTIE_MERGE.out.gtf
         )
 
-        // Feed with the result of stringtie merge
-        FEELNC_FILTER (
-                STRINGTIE_MERGE.out.gtf,
-            PREPARE_GENOME.out.gtf
-        )
+        if (!params.skip_feelnc) {
+            // Feed with the result of stringtie merge
+            FEELNC_FILTER (
+                    STRINGTIE_MERGE.out.gtf,
+                PREPARE_GENOME.out.gtf
+            )
 
-        // Compute the coding potential (CODPLOT) of candidate transcripts
-        FEELNC_CODPOT (
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gtf,
-            FEELNC_FILTER.out.lncrna_gtf // candidate lncrna transcripts
-        )
+            // Compute the coding potential (CODPLOT) of candidate transcripts
+            FEELNC_CODPOT (
+                PREPARE_GENOME.out.fasta,
+                PREPARE_GENOME.out.gtf,
+                FEELNC_FILTER.out.lncrna_gtf // candidate lncrna transcripts
+            )
+        }
     }
 
     //

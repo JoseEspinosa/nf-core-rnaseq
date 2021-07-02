@@ -4,6 +4,8 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
+def VERSION = '0.2' // Not possible to retrieve version from tool
+
 process FEELNC_FILTER {
     tag "$gtf_to_filter"
     label 'process_medium'
@@ -32,7 +34,9 @@ process FEELNC_FILTER {
     FEELnc_filter.pl \\
         --infile $new_annotation_gtf \\
         --mRNAfile $coding_annotation_gtf \\
-        --biotype transcript_biotype=protein_coding \\
+        $options.args
         > candidate_lnc_rna.gtf
+
+    echo $VERSION > ${software}.version.txt
     """
 }

@@ -4,6 +4,8 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
+def VERSION = '0.2' // Not possible to retrieve version from tool
+
 process FEELNC_CODPOT {
     tag "$lncrna_gtf"
     label 'process_medium'
@@ -45,5 +47,7 @@ process FEELNC_CODPOT {
         --mode shuffle \\
         --spethres=0.98,0.98 \\
         $options.args
+
+    echo $VERSION > ${software}.version.txt
     """
 }
