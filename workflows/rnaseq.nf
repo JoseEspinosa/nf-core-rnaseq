@@ -173,6 +173,7 @@ include { QUALIMAP_RNASEQ                 } from '../modules/nf-core/software/qu
 include { SORTMERNA                       } from '../modules/nf-core/software/sortmerna/main'             addParams( options: sortmerna_options                            )
 include { STRINGTIE                       } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_options                            )
 include { STRINGTIE_MERGE                 } from '../modules/nf-core/software/stringtie/merge/main'       addParams( options: modules['stringtie_merge']                   )
+include { FORMAT_STRINGTIE_GTF            } from '../modules/local/format_stringtie_gtf'                  addParams( options: modules['format_stringtie_gtf']              )
 include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: modules['stringtie_quantify']                )
 include { FEELNC_FILTER                   } from '../modules/local/feelnc_filter'                         addParams( options: modules['feelnc_filter']                     )
 include { FEELNC_CODPOT                   } from '../modules/local/feelnc_codpot'                         addParams( options: modules['feelnc_codpot']                     )
@@ -562,16 +563,22 @@ workflow RNASEQ {
             PREPARE_GENOME.out.gtf
         )
 
+        FORMAT_STRINGTIE_GTF (
+            STRINGTIE_MERGE.out.gtf,
+            PREPARE_GENOME.out.gtf
+        )
+
         // STRINGTIE.out.transcript_gtf.collect{ meta, gtfs -> gtfs }.view()
         STRINGTIE_QUANTIFY (
             ch_genome_bam,
-            STRINGTIE_MERGE.out.gtf
+            FORMAT_STRINGTIE_GTF.out.gtf
         )
 
         if (!params.skip_feelnc) {
             // Feed with the result of stringtie merge
             FEELNC_FILTER (
-                    STRINGTIE_MERGE.out.gtf,
+                // STRINGTIE_MERGE.out.gtf, //TODO delete old
+                FORMAT_STRINGTIE_GTF.out.gtf,
                 PREPARE_GENOME.out.gtf
             )
 
