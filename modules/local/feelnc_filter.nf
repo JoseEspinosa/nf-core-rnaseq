@@ -7,7 +7,7 @@ options        = initOptions(params.options)
 def VERSION = '0.2' // Not possible to retrieve version from tool
 
 process FEELNC_FILTER {
-    tag "$gtf_to_filter"
+    tag "$new_annotation_gtf"
     label 'process_medium'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -26,7 +26,7 @@ process FEELNC_FILTER {
 
     output:
     path("candidate_lnc_rna.gtf"), emit: lncrna_gtf
-    // path  "*.version.txt"       , emit: version //TODO how to get version
+    path  "*.version.txt"        , emit: version //TODO how to get version
 
     script:
     def software = getSoftwareName(task.process)
@@ -34,8 +34,7 @@ process FEELNC_FILTER {
     FEELnc_filter.pl \\
         --infile $new_annotation_gtf \\
         --mRNAfile $coding_annotation_gtf \\
-        $options.args
-        > candidate_lnc_rna.gtf
+        $options.args > candidate_lnc_rna.gtf
 
     echo $VERSION > ${software}.version.txt
     """

@@ -27,7 +27,7 @@ process FEELNC_CODPOT {
 
     output:
     path("candidate_lncRNA.gtf"), emit: lncrna_gtf
-    // path  "*.version.txt"       , emit: version //TODO how to get version
+    path  "*.version.txt"       , emit: version //TODO how to get version
 
     script:
     def software = getSoftwareName(task.process)
