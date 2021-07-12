@@ -60,6 +60,6 @@ process FORMAT_STRINGTIE_GTF {
                 print \$0
             }
         }
-    ' $annotation new.genes.gff > stringtie.merged.biotypes.gtf
+    ' $annotation_gtf new.genes.gff > stringtie.merged.biotypes.gtf
     """
 }
