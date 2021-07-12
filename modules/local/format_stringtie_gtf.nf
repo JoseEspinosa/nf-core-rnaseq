@@ -52,7 +52,7 @@ process FORMAT_STRINGTIE_GTF {
             if (substr(\$1,1,1) != "#" && \$3 != "gene") {
                 match(\$9, /transcript_id "([^;]*)";*/, tId)
                 if (tId[1] in biotypes) {
-                    print \$0 " transcript_biotype \""biotypes[tId[1]]"\";"
+                    print \$0 " transcript_biotype \\""biotypes[tId[1]]"\\";"
                 } else {
                     print \$0
                 }
