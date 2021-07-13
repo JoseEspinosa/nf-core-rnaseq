@@ -6,7 +6,7 @@ options        = initOptions(params.options)
 
 def VERSION = '0.2' // Not possible to retrieve version from tool
 
-process FEELNC_CODPOT {
+process FEELNC_CLASSIFIER {
     tag "$lncrna_gtf"
     label 'process_medium'
     publishDir "${params.outdir}",
@@ -21,32 +21,24 @@ process FEELNC_CODPOT {
     }
 
     input:
-    path genome //gtf or fasta
-    path coding_annotation_gtf //gtf or fasta
-    path lncrna_gtf
+    path coding_annotation_gtf
+    path exons_biotypes
 
     output:
-    path "exons.*.gtf"  , emit: exons_gtf
-    path "*.version.txt", emit: version //TODO how to get version
+    path "lncRNA_classes.txt", emit: lncrna_classes
+    path "*.version.txt"     , emit: version
 
     script:
     def software = getSoftwareName(task.process)
     """
-    path_to_codpot=\$(which FEELnc_codpot.pl)
-    export FEELNCPATH=\${path_to_codpot%/*}/..
+    path_to_classifier=\$(which FEELnc_classifier.pl)
+    export FEELNCPATH=\${path_to_classifier%/*}/..
 
-    FEELnc_codpot.pl \\
-        --genome $genome \\
-        --mRNAfile $coding_annotation_gtf \\
-        --infile $lncrna_gtf \\
-        --biotype transcript_biotype=protein_coding \\
-        --numtx 5000,5000 \\
-        --kmer 1,2,3,6,9,12 \\
-        --outdir . \\
-        --outname exons \\
-        --mode shuffle \\
-        --spethres=0.98,0.98 \\
-        $options.args
+    FEELnc_classifier.pl \\
+        --mrna $coding_annotation \\
+        --lncrna  exons.lncRNA.gtf \\
+        $options.args \\
+        > lncRNA_classes.txt
 
     echo $VERSION > ${software}.version.txt
     """

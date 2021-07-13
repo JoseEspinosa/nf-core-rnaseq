@@ -177,6 +177,8 @@ include { FORMAT_STRINGTIE_GTF            } from '../modules/local/format_string
 include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: modules['stringtie_quantify']                )
 include { FEELNC_FILTER                   } from '../modules/local/feelnc_filter'                         addParams( options: modules['feelnc_filter']                     )
 include { FEELNC_CODPOT                   } from '../modules/local/feelnc_codpot'                         addParams( options: modules['feelnc_codpot']                     )
+include { ASSIGN_FEELNC_BIOTYPE           } from '../modules/local/assign_feelnc_biotype'                 addParams( options: modules['assign_feelnc_biotype']             )
+include { FEELNC_CLASSIFIER               } from '../modules/local/feelnc_classifier'                     addParams( options: modules['feelnc_classifier']                 )
 include { SUBREAD_FEATURECOUNTS           } from '../modules/nf-core/software/subread/featurecounts/main' addParams( options: subread_featurecounts_options                )
 
 //
@@ -587,6 +589,16 @@ workflow RNASEQ {
                 PREPARE_GENOME.out.fasta,
                 PREPARE_GENOME.out.gtf,
                 FEELNC_FILTER.out.lncrna_gtf // candidate lncrna transcripts
+            )
+
+            ASSIGN_FEELNC_BIOTYPE (
+                FORMAT_STRINGTIE_GTF.out.gtf,
+                FEELNC_CODPOT.out.exons_gtf
+            )
+
+            FEELNC_CLASSIFIER (
+                ASSIGN_FEELNC_BIOTYPE.out.coding_transcripts,
+                FEELNC_CODPOT.out.exons_gtf
             )
         }
     }
