@@ -3,12 +3,12 @@
 //
 
 params.feelnc_filter_options         = [:]
-params.feelnc_codplot_options        = [:]
+params.feelnc_codpot_options         = [:]
 params.assign_feelnc_biotype_options = [:]
 params.feelnc_classifier_options     = [:]
 
 include { FEELNC_FILTER         } from '../../modules/local/feelnc_filter'         addParams( options: params.feelnc_filter_options         )
-include { FEELNC_CODPOT         } from '../../modules/local/feelnc_codpot'         addParams( options: params.feelnc_codplot_options        )
+include { FEELNC_CODPOT         } from '../../modules/local/feelnc_codpot'         addParams( options: params.feelnc_codpot_options         )
 include { ASSIGN_FEELNC_BIOTYPE } from '../../modules/local/assign_feelnc_biotype' addParams( options: params.assign_feelnc_biotype_options )
 include { FEELNC_CLASSIFIER     } from '../../modules/local/feelnc_classifier'     addParams( options: params.feelnc_classifier_options     )
 

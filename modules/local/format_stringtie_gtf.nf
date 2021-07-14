@@ -23,7 +23,7 @@ process FORMAT_STRINGTIE_GTF {
     output:
     path "stringtie.merged.biotypes.gtf", emit: gtf
 
-    script: // compute_boundaries.awk and add_biotype.awk are bundled with the pipeline, in nf-core/rnaseq/bin/
+    script: // compute_boundaries.awk is bundled with the pipeline, in nf-core/rnaseq/bin/
     """
     compute_boundaries.awk \\
         -v toadd=gene \\
