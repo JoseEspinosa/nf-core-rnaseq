@@ -36,7 +36,7 @@ process FEELNC_CLASSIFIER {
 
     FEELnc_classifier.pl \\
         --mrna $coding_annotation \\
-        --lncrna  exons.lncRNA.gtf \\
+        --lncrna  feelnc.predicted.lncRNA.gtf \\
         $options.args \\
         > lncRNA_classes.txt
 
