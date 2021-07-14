@@ -7,7 +7,7 @@ options        = initOptions(params.options)
 def VERSION = '0.2' // Not possible to retrieve version from tool
 
 process FEELNC_CLASSIFIER {
-    tag "$lncrna_gtf"
+    tag "$coding_annotation_gtf"
     label 'process_medium'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
