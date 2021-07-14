@@ -35,7 +35,7 @@ process FEELNC_CLASSIFIER {
     export FEELNCPATH=\${path_to_classifier%/*}/..
 
     FEELnc_classifier.pl \\
-        --mrna $coding_annotation \\
+        --mrna $coding_annotation_gtf \\
         --lncrna  feelnc.predicted.lncRNA.gtf \\
         $options.args \\
         > lncRNA_classes.txt
