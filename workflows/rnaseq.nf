@@ -138,9 +138,10 @@ if (['star_salmon','hisat2'].contains(params.aligner)) {
     }
 }
 
-include { INPUT_CHECK    } from '../subworkflows/local/input_check'    addParams( options: [:] )
-include { PREPARE_GENOME } from '../subworkflows/local/prepare_genome' addParams( genome_options: publish_genome_options, index_options: publish_index_options, gffread_options: gffread_options,  star_index_options: star_genomegenerate_options,  hisat2_index_options: hisat2_build_options, rsem_index_options: rsem_preparereference_options, salmon_index_options: salmon_index_options )
-include { QUANTIFY_RSEM  } from '../subworkflows/local/quantify_rsem'  addParams( calculateexpression_options: rsem_calculateexpression_options, samtools_sort_options: samtools_sort_genome_options, samtools_index_options: samtools_index_genome_options, samtools_stats_options: samtools_index_genome_options, merge_counts_options: modules['rsem_merge_counts'] )
+include { INPUT_CHECK     } from '../subworkflows/local/input_check'     addParams( options: [:] )
+include { PREPARE_GENOME  } from '../subworkflows/local/prepare_genome'  addParams( genome_options: publish_genome_options, index_options: publish_index_options, gffread_options: gffread_options,  star_index_options: star_genomegenerate_options,  hisat2_index_options: hisat2_build_options, rsem_index_options: rsem_preparereference_options, salmon_index_options: salmon_index_options )
+include { QUANTIFY_RSEM   } from '../subworkflows/local/quantify_rsem'   addParams( calculateexpression_options: rsem_calculateexpression_options, samtools_sort_options: samtools_sort_genome_options, samtools_index_options: samtools_index_genome_options, samtools_stats_options: samtools_index_genome_options, merge_counts_options: modules['rsem_merge_counts'] )
+include { ANNOTATE_FEELNC } from '../subworkflows/local/annotate_feelnc' addParams( feelnc_filter_options: modules['feelnc_filter'], feelnc_codpot_options: modules['feelnc_codpot'], assign_feelnc_biotype_options: modules['assign_feelnc_biotype'], feelnc_classifier_options: modules['feelnc_classifier'])
 include { QUANTIFY_SALMON as QUANTIFY_STAR_SALMON } from '../subworkflows/local/quantify_salmon'    addParams( genome_options: publish_genome_options, tximport_options: modules['star_salmon_tximport'], salmon_quant_options: modules['star_salmon_quant'], merge_counts_options: modules['star_salmon_merge_counts'] )
 include { QUANTIFY_SALMON as QUANTIFY_SALMON      } from '../subworkflows/local/quantify_salmon'    addParams( genome_options: publish_genome_options, tximport_options: modules['salmon_tximport'], salmon_quant_options: salmon_quant_options, merge_counts_options: modules['salmon_merge_counts'] )
 
@@ -559,9 +560,7 @@ workflow RNASEQ {
         ch_software_versions = ch_software_versions.mix(STRINGTIE.out.version.first().ifEmpty(null))
 
         STRINGTIE_MERGE (
-            // STRINGTIE_ANNOTATE.out.transcript_gtf.collect{it[1]},
             STRINGTIE.out.transcript_gtf.collect{ meta, gtfs -> gtfs },
-            // SALMON_QUANT.out.results.collect{it[1]},
             PREPARE_GENOME.out.gtf
         )
 
@@ -570,35 +569,19 @@ workflow RNASEQ {
             PREPARE_GENOME.out.gtf
         )
 
-        // STRINGTIE.out.transcript_gtf.collect{ meta, gtfs -> gtfs }.view()
         STRINGTIE_QUANTIFY (
             ch_genome_bam,
             FORMAT_STRINGTIE_GTF.out.gtf
         )
 
+        //
+        // SUBWORKFLOW: Predict lncrna using FEELNC
+        //
         if (!params.skip_feelnc) {
-            // Feed with the result of stringtie merge
-            FEELNC_FILTER (
-                // STRINGTIE_MERGE.out.gtf, //TODO delete old
+            ANNOTATE_FEELNC (
                 FORMAT_STRINGTIE_GTF.out.gtf,
-                PREPARE_GENOME.out.gtf
-            )
-
-            // Compute the coding potential (CODPLOT) of candidate transcripts
-            FEELNC_CODPOT (
-                PREPARE_GENOME.out.fasta,
                 PREPARE_GENOME.out.gtf,
-                FEELNC_FILTER.out.lncrna_gtf // candidate lncrna transcripts
-            )
-
-            ASSIGN_FEELNC_BIOTYPE (
-                FORMAT_STRINGTIE_GTF.out.gtf,
-                FEELNC_CODPOT.out.exons_gtf
-            )
-
-            FEELNC_CLASSIFIER (
-                ASSIGN_FEELNC_BIOTYPE.out.coding_transcripts,
-                FEELNC_CODPOT.out.exons_gtf
+                PREPARE_GENOME.out.fasta
             )
         }
     }

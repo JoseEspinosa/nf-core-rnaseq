@@ -25,8 +25,8 @@ process FEELNC_FILTER {
     path coding_annotation_gtf
 
     output:
-    path("candidate_lnc_rna.gtf"), emit: lncrna_gtf
-    path  "*.version.txt"        , emit: version //TODO how to get version
+    path "candidate_lncrna.gtf", emit: candidate_lncrna_gtf
+    path "*.version.txt"       , emit: version
 
     script:
     def software = getSoftwareName(task.process)
@@ -34,7 +34,7 @@ process FEELNC_FILTER {
     FEELnc_filter.pl \\
         --infile $new_annotation_gtf \\
         --mRNAfile $coding_annotation_gtf \\
-        $options.args > candidate_lnc_rna.gtf
+        $options.args > candidate_lncrna.gtf
 
     echo $VERSION > ${software}.version.txt
     """
