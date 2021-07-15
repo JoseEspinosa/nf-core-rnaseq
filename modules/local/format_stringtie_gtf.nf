@@ -9,11 +9,11 @@ process FORMAT_STRINGTIE_GTF {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'genome', meta:[:], publish_by_meta:[]) }
 
-    conda (params.enable_conda ? "conda-forge::gawk=5.1.0" : null)
+    conda (params.enable_conda ? "conda-forge::python=3.8.3" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/gawk:5.1.0"
+        container "https://depot.galaxyproject.org/singularity/python:3.8.3"
     } else {
-        container "quay.io/biocontainers/gawk:5.1.0"
+        container "quay.io/biocontainers/python:3.8.3"
     }
 
     input:
@@ -23,7 +23,7 @@ process FORMAT_STRINGTIE_GTF {
     output:
     path "stringtie.merged.biotypes.gtf", emit: gtf
 
-    script: // compute_boundaries.awk is bundled with the pipeline, in nf-core/rnaseq/bin/
+    script: // compute_boundaries.awk and add_biotype.py are bundled with the pipeline, in nf-core/rnaseq/bin/
     """
     compute_boundaries.awk \\
         -v toadd=gene \\
@@ -33,33 +33,8 @@ process FORMAT_STRINGTIE_GTF {
 
     cat $stringtie_gtf stringtie_gtf.genes.gff | sort -k1,1 -k4,4n -k5,5rn > new.genes.gff
 
-    awk '
-        BEGIN {
-            FS = "\t"
-        }
-        NR == FNR {
-            match(\$9, /transcript_id "([^;]*)";*/, tId)
-            match(\$9, /biotype "([^;]*)";*/, biotype)
-            if (tId[1] in biotypes) {
-                next
-            }
-            else {
-                biotypes[tId[1]] = biotype[1]
-                next
-            }
-        }
-        {
-            if (substr(\$1,1,1) != "#" && \$3 != "gene") {
-                match(\$9, /transcript_id "([^;]*)";*/, tId)
-                if (tId[1] in biotypes) {
-                    print \$0 " transcript_biotype \\""biotypes[tId[1]]"\\";"
-                } else {
-                    print \$0
-                }
-            } else {
-                print \$0
-            }
-        }
-    ' $annotation_gtf new.genes.gff > stringtie.merged.biotypes.gtf
+    add_biotype.py \\
+        $annotation_gtf \\
+        new.genes.gff > stringtie.merged.biotypes.gtf
     """
 }

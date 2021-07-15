@@ -31,7 +31,7 @@
 BEGIN{
     OFS="\t";
     if(keys!="") {
-        n=split(keys,key,","); # just get as many keys as provided by the user
+        n=split(keys,key,",");
         j=1;
         while(key[j]!="") {
             ok[key[j]]=1;
@@ -40,26 +40,25 @@ BEGIN{
     }
 }
 
-$1!~/#/{                                    # avoid comments
-    split($0,a,"\t"); # a is just the array name
-    seen[$fldno]++; # keep how many times you get the feature (in a given field number) for instance gene_name
+$1!~/#/{
+    split($0,a,"\t");
+    seen[$fldno]++;
 
-    # first time it appears keep the values we need
     if(seen[$fldno]==1) {
 
         chr[$fldno]=a[1];
         strand[$fldno]=a[7];
-        cat[$fldno]=a[2]; ## category StringTie or ensembl
+        cat[$fldno]=a[2];
         fstbeg[$fldno]=a[4];
         lstend[$fldno]=a[5];
 
         if(keys!="") {
-            split(a[9],b,"; "); # split field number 9 by ";"
+            split(a[9],b,"; ");
             i=1;
             while(b[i]!="") {
-                split(b[i],c," "); # split by " " each individual of the fields separated by ";"
+                split(b[i],c," ");
 
-                if(ok[c[1]]==1) { # if its one of the selected keys in the begin closure then add it to keep it
+                if(ok[c[1]]==1) {
                     infotoadd[$fldno,c[1]]=c[2];
                 }
 
@@ -69,27 +68,25 @@ $1!~/#/{                                    # avoid comments
     }
     else{
 	    if(a[7]!=strand[$fldno]){
-	        strand[$fldno]="."; ## if strand differs set .
+	        strand[$fldno]=".";
 	    }
         if(a[2]!=cat[$fldno]){
-            cat[$fldno]="."; ## if category (StringTie, ensembl,...) differs set .
+            cat[$fldno]=".";
             }
         if(a[4]<fstbeg[$fldno]){
-            fstbeg[$fldno]=a[4]; ## if begin is smaller set
+            fstbeg[$fldno]=a[4];
         }
         if(a[5]>lstend[$fldno]){
-            lstend[$fldno]=a[5]; ## if end is bigger set
+            lstend[$fldno]=a[5];
         }
         if(keys!=""){
-            split(a[9],b,"; "); ## split field number 9 by "; "
+            split(a[9],b,"; ");
             i=1;
             while(b[i]!=""){
-                split(b[i],c," "); ## split by " " each individual of the fields separated by "; "
+                split(b[i],c," ");
 
 
-                if(ok[c[1]]==1){ ## if its one of the selected keys in the begin closure then add it to keep it
-                    ## if the value is different to the one set in the first appearance
-                    ## then keep it in pb
+                if(ok[c[1]]==1){
                     if(c[2]!=infotoadd[$fldno,c[1]]){
                         pb[$fldno,c[1]]=1;
                     }
@@ -112,6 +109,5 @@ END{
         }
         gsub(/;;/,";",toadd2[k]);
         print chr[k], cat[k], toadd, fstbeg[k], lstend[k], ".", strand[k], ".", toadd"_id "(k)(toadd2[k]);
-                              # toadd is the variable provided in the cmd line  # here is like a for for the dictionary
     }
 }
