@@ -174,9 +174,6 @@ include { PRESEQ_LCEXTRAP                 } from '../modules/nf-core/software/pr
 include { QUALIMAP_RNASEQ                 } from '../modules/nf-core/software/qualimap/rnaseq/main'       addParams( options: modules['qualimap_rnaseq']                   )
 include { SORTMERNA                       } from '../modules/nf-core/software/sortmerna/main'             addParams( options: sortmerna_options                            )
 include { STRINGTIE                       } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_options                            )
-// include { STRINGTIE_MERGE                 } from '../modules/nf-core/software/stringtie/merge/main'       addParams( options: modules['stringtie_merge']                   )
-// include { FORMAT_STRINGTIE_GTF            } from '../modules/local/format_stringtie_gtf'                  addParams( options: modules['format_stringtie_gtf']              )
-// include { STRINGTIE as STRINGTIE_QUANTIFY } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: modules['stringtie_quantify']                )
 include { FEELNC_FILTER                   } from '../modules/local/feelnc_filter'                         addParams( options: modules['feelnc_filter']                     )
 include { FEELNC_CODPOT                   } from '../modules/local/feelnc_codpot'                         addParams( options: modules['feelnc_codpot']                     )
 include { ASSIGN_FEELNC_BIOTYPE           } from '../modules/local/assign_feelnc_biotype'                 addParams( options: modules['assign_feelnc_biotype']             )
@@ -568,20 +565,6 @@ workflow RNASEQ {
             PREPARE_GENOME.out.gtf,
             ch_genome_bam
         )
-        // STRINGTIE_MERGE (
-        //     STRINGTIE.out.transcript_gtf.collect{ meta, gtfs -> gtfs },
-        //     PREPARE_GENOME.out.gtf
-        // )
-
-        // FORMAT_STRINGTIE_GTF (
-        //     STRINGTIE_MERGE.out.gtf,
-        //     PREPARE_GENOME.out.gtf
-        // )
-
-        // STRINGTIE_QUANTIFY (
-        //     ch_genome_bam,
-        //     FORMAT_STRINGTIE_GTF.out.gtf
-        // )
 
         //
         // SUBWORKFLOW: Predict lncrna using FEELNC
