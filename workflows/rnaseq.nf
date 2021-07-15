@@ -548,7 +548,6 @@ workflow RNASEQ {
 
     //
     // MODULE: STRINGTIE
-    // TODO CREATE a workflow similar to quantify salmon or bam_sort_samtools.nf
     //
     if (!params.skip_alignment && !params.skip_stringtie) {
         STRINGTIE (
@@ -560,18 +559,20 @@ workflow RNASEQ {
         //
         // SUBWORKFLOW: QUANTIFY STRINGTIE ANNOTATED TRANSCRIPTS
         //
-        QUANTIFY_STRINGTIE (
-            STRINGTIE.out.transcript_gtf.collect{ meta, gtfs -> gtfs },
-            PREPARE_GENOME.out.gtf,
-            ch_genome_bam
-        )
+        if (params.stringtie_ignore_gtf) {
+            QUANTIFY_STRINGTIE (
+                STRINGTIE.out.transcript_gtf.collect{ meta, gtfs -> gtfs },
+                PREPARE_GENOME.out.gtf,
+                ch_genome_bam
+            )
+        }
 
         //
         // SUBWORKFLOW: Predict lncrna using FEELNC
         //
-        if (!params.skip_feelnc) {
+        if (!params.skip_feelnc && params.stringtie_ignore_gtf) {
             ANNOTATE_FEELNC (
-                FORMAT_STRINGTIE_GTF.out.gtf,
+                QUANTIFY_STRINGTIE.out.stringtie_merged_biotypes_gtf,
                 PREPARE_GENOME.out.gtf,
                 PREPARE_GENOME.out.fasta
             )
