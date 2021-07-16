@@ -174,10 +174,6 @@ include { PRESEQ_LCEXTRAP                 } from '../modules/nf-core/software/pr
 include { QUALIMAP_RNASEQ                 } from '../modules/nf-core/software/qualimap/rnaseq/main'       addParams( options: modules['qualimap_rnaseq']                   )
 include { SORTMERNA                       } from '../modules/nf-core/software/sortmerna/main'             addParams( options: sortmerna_options                            )
 include { STRINGTIE                       } from '../modules/nf-core/software/stringtie/stringtie/main'   addParams( options: stringtie_options                            )
-include { FEELNC_FILTER                   } from '../modules/local/feelnc_filter'                         addParams( options: modules['feelnc_filter']                     )
-include { FEELNC_CODPOT                   } from '../modules/local/feelnc_codpot'                         addParams( options: modules['feelnc_codpot']                     )
-include { ASSIGN_FEELNC_BIOTYPE           } from '../modules/local/assign_feelnc_biotype'                 addParams( options: modules['assign_feelnc_biotype']             )
-include { FEELNC_CLASSIFIER               } from '../modules/local/feelnc_classifier'                     addParams( options: modules['feelnc_classifier']                 )
 include { SUBREAD_FEATURECOUNTS           } from '../modules/nf-core/software/subread/featurecounts/main' addParams( options: subread_featurecounts_options                )
 
 //
