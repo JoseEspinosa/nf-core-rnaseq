@@ -20,7 +20,7 @@ process ASSIGN_FEELNC_BIOTYPE {
 
     input:
     path feelnc_gtf
-    path exons_biotypes
+    path feelnc_predicted_biotypes
 
     output:
     path "coding_transcripts.gtf", emit: coding_transcripts
@@ -30,7 +30,7 @@ process ASSIGN_FEELNC_BIOTYPE {
     # Enrich assembled annotation with new biotypes
     cp $feelnc_gtf novel.feelnc_biotype.gff
     for biotype in lncRNA mRNA noORF TUCp; do
-        if [ -f exons.\$biotype.gtf ]; then
+        if [ -f feelnc.predicted.\$biotype.gtf ]; then
             awk -v biotype=\$biotype '
                 BEGIN {
                     FS = "\t"
