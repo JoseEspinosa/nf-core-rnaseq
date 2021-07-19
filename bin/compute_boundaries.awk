@@ -64,12 +64,12 @@ $1!~/#/{
 
                 i++;
             }
-	    }
+        }
     }
     else{
-	    if(a[7]!=strand[$fldno]){
-	        strand[$fldno]=".";
-	    }
+        if(a[7]!=strand[$fldno]){
+            strand[$fldno]=".";
+        }
         if(a[2]!=cat[$fldno]){
             cat[$fldno]=".";
             }
@@ -98,7 +98,7 @@ $1!~/#/{
 }
 
 END{
-  for(k in seen){
+    for(k in seen){
         if(keys!=""){
             toadd2[k]=" ";
             for(i=1; i<=n; i++){
