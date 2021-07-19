@@ -2,13 +2,15 @@
 // Quantify Stringtie annotated transcripts
 //
 
-params.stringtie_merge_options      = [:]
-params.format_stringtie_gtf_options = [:]
-params.stringtie_quantify_options   = [:]
+params.stringtie_merge_options                   = [:]
+params.format_stringtie_gtf_options              = [:]
+params.stringtie_quantify_new_annotation_options = [:]
+params.stringtie_quantify_reference_options      = [:]
 
-include { STRINGTIE_MERGE      } from '../../modules/nf-core/software/stringtie/merge/main'     addParams( options: params.stringtie_merge_options      )
-include { FORMAT_STRINGTIE_GTF } from '../../modules/local/format_stringtie_gtf'                addParams( options: params.format_stringtie_gtf_options )
-include { STRINGTIE            } from '../../modules/nf-core/software/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_options   )
+include { STRINGTIE_MERGE      } from '../../modules/nf-core/software/stringtie/merge/main' addParams( options: params.stringtie_merge_options )
+include { FORMAT_STRINGTIE_GTF } from '../../modules/local/format_stringtie_gtf'            addParams( options: params.format_stringtie_gtf_options )
+include { STRINGTIE as STRINGTIE_NEW_ANNOTATION } from '../../modules/nf-core/software/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_new_annotation_options )
+include { STRINGTIE as STRINGTIE_REFERENCE      } from '../../modules/nf-core/software/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_reference_options )
 
 workflow QUANTIFY_STRINGTIE {
     take:
@@ -28,19 +30,30 @@ workflow QUANTIFY_STRINGTIE {
         reference_gtf
     )
 
-    STRINGTIE (
+    STRINGTIE_NEW_ANNOTATION (
         ch_genome_bam,
         FORMAT_STRINGTIE_GTF.out.gtf
     )
 
+    STRINGTIE_REFERENCE (
+        ch_genome_bam,
+        reference_gtf
+    )
+
     emit:
-    stringtie_merged_gtf          = STRINGTIE_MERGE.out.gtf      // path: stringtie.merged.gtf
+    stringtie_merged_gtf          = STRINGTIE_MERGE.out.gtf                     // path: stringtie.merged.gtf
 
-    stringtie_merged_biotypes_gtf = FORMAT_STRINGTIE_GTF.out.gtf // path: stringtie.merged.biotypes.gtf
+    stringtie_merged_biotypes_gtf = FORMAT_STRINGTIE_GTF.out.gtf                // path: stringtie.merged.biotypes.gtf
 
-    stringtie_coverage_gtf        = STRINGTIE.out.coverage_gtf   // path: *.coverage.gtf
-    stringtie_transcript_gtf      = STRINGTIE.out.transcript_gtf // path: *.transcripts.gtf
-    stringtie_abundance           = STRINGTIE.out.abundance      // path: *.abundance.txt
-    stringtie_ballgown            = STRINGTIE.out.ballgown       // path: *.ballgown
-    stringtie_version             = STRINGTIE.out.version        // path: *.version.txt
+    stringtie_coverage_gtf        = STRINGTIE_NEW_ANNOTATION.out.coverage_gtf   // path: *.coverage.gtf
+    stringtie_transcript_gtf      = STRINGTIE_NEW_ANNOTATION.out.transcript_gtf // path: *.transcripts.gtf
+    stringtie_abundance           = STRINGTIE_NEW_ANNOTATION.out.abundance      // path: *.abundance.txt
+    stringtie_ballgown            = STRINGTIE_NEW_ANNOTATION.out.ballgown       // path: *.ballgown
+    stringtie_version             = STRINGTIE_NEW_ANNOTATION.out.version        // path: *.version.txt
+
+    stringtie_coverage_gtf        = STRINGTIE_REFERENCE.out.coverage_gtf        // path: *.coverage.gtf
+    stringtie_transcript_gtf      = STRINGTIE_REFERENCE.out.transcript_gtf      // path: *.transcripts.gtf
+    stringtie_abundance           = STRINGTIE_REFERENCE.out.abundance           // path: *.abundance.txt
+    stringtie_ballgown            = STRINGTIE_REFERENCE.out.ballgown            // path: *.ballgown
+    stringtie_version             = STRINGTIE_REFERENCE.out.version             // path: *.version.txt
 }
