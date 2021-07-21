@@ -4,8 +4,8 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-process STRINGTIE_MERGE {
-    tag "$gtf"
+process STRINGTIE_PREPDE {
+    tag "$meta.id"
     label 'process_medium'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -19,20 +19,25 @@ process STRINGTIE_MERGE {
     }
 
     input:
-    path gtf_to_merge //TODO check how this is done in other modules receiving a list of files (collect)
-    path gtf
+    tuple val(meta), path(transcript_gtf) // should take the output of stringtie -o transcripts
 
     output:
-    path("new.annotation.gtf"), emit: annotation_gtf
-    path  "*.version.txt"     , emit: version
+    tuple val(meta), path ('*.genes_counts.csv')      , emit: genes_counts_csv
+    tuple val(meta), path ('*.transcripts_counts.csv'), emit: transcripts_counts_csv
+    path "*.version.txt"                              , emit: version
 
     script:
     def software = getSoftwareName(task.process)
+    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+
     """
-    stringtie --merge \\
-        $gtf_to_merge \\
-        -G $gtf \\
-        -o new.annotation.gtf \\
+    mkdir gtf
+    mv $transcript_gtf gtf
+
+    prepDE.py -i . \\
+        -g ${prefix}.genes_counts.csv \\
+        -t ${prefix}.transcripts_counts.csv \\
+        -p gtf \\
         $options.args
 
     stringtie --version > ${software}.version.txt

@@ -4,11 +4,13 @@
 
 params.stringtie_merge_options                   = [:]
 params.format_stringtie_gtf_options              = [:]
+params.stringtie_prepde_options                  = [:]
 params.stringtie_quantify_new_annotation_options = [:]
 params.stringtie_quantify_reference_options      = [:]
 
 include { STRINGTIE_MERGE      } from '../../modules/nf-core/software/stringtie/merge/main' addParams( options: params.stringtie_merge_options )
 include { FORMAT_STRINGTIE_GTF } from '../../modules/local/format_stringtie_gtf'            addParams( options: params.format_stringtie_gtf_options )
+include { STRINGTIE_PREPDE     } from '../../modules/local/stringtie_prepde'                addParams( options: params.stringtie_prepde_options )
 include { STRINGTIE as STRINGTIE_NEW_ANNOTATION } from '../../modules/nf-core/software/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_new_annotation_options )
 include { STRINGTIE as STRINGTIE_REFERENCE      } from '../../modules/nf-core/software/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_reference_options )
 
@@ -35,10 +37,69 @@ workflow QUANTIFY_STRINGTIE {
         FORMAT_STRINGTIE_GTF.out.gtf
     )
 
+    STRINGTIE_NEW_ANNOTATION
+        .out
+        .transcript_gtf
+        .map {
+            meta, gtf ->
+                meta.id = meta.id + '.new_annotation'
+                [ meta, gtf ]
+        }
+        .set { ch_gtf_new_annotation }
+
+    //ch_gtf_new_annotation.view()
+
     STRINGTIE_REFERENCE (
         ch_genome_bam,
         reference_gtf
     )
+
+    STRINGTIE_REFERENCE
+        .out
+        .transcript_gtf
+        .map {
+            meta, gtf ->
+                meta.id = meta.id + '.reference'
+                [ meta, gtf ]
+        }
+        .mix ( ch_gtf_new_annotation )
+        .set { ch_gtf_transcripts }
+
+    // ch_gtf_transcripts.view()
+
+    // STRINGTIE_NEW_ANNOTATION.out.transcript_gtf
+    // INFER READ LENGTH
+    // READ_LENGTH (
+    //     ch_genome_bam
+    // )
+
+    // ch_genome_bam.join(ch_genome_bam_index, by: [0])
+    // STRINGTIE_NEW_ANNOTATION.out.join(transcript_gtfREAD_LENGTH.out.bam_read_length, by: [0])
+
+    STRINGTIE_PREPDE (
+        ch_gtf_transcripts
+    )
+
+    // .map {
+    //     meta,
+    // }
+
+    // INPUT_CHECK (
+    //     ch_input
+    // )
+    // .map {
+    //     meta, fastq ->
+    //         meta.id = meta.id.split('_')[0..-2].join('_')
+    //         [ meta, fastq ] }
+    // .groupTuple(by: [0])
+    // .branch {
+    //     meta, fastq ->
+    //         single  : fastq.size() == 1
+    //             return [ meta, fastq.flatten() ]
+    //         multiple: fastq.size() > 1
+    //             return [ meta, fastq.flatten() ]
+    // }
+    // .set { ch_fastq }
 
     emit:
     stringtie_merged_gtf          = STRINGTIE_MERGE.out.gtf                     // path: stringtie.merged.gtf
