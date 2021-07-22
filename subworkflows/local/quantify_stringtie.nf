@@ -63,6 +63,8 @@ workflow QUANTIFY_STRINGTIE {
         .mix ( ch_gtf_new_annotation )
         .set { ch_gtf_transcripts }
 
+    // ch_gtf_transcripts.view()
+
     STRINGTIE_PREPDE (
         ch_gtf_transcripts
     )
