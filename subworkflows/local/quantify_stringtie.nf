@@ -67,39 +67,9 @@ workflow QUANTIFY_STRINGTIE {
 
     // ch_gtf_transcripts.view()
 
-    // STRINGTIE_NEW_ANNOTATION.out.transcript_gtf
-    // INFER READ LENGTH
-    // READ_LENGTH (
-    //     ch_genome_bam
-    // )
-
-    // ch_genome_bam.join(ch_genome_bam_index, by: [0])
-    // STRINGTIE_NEW_ANNOTATION.out.join(transcript_gtfREAD_LENGTH.out.bam_read_length, by: [0])
-
     STRINGTIE_PREPDE (
         ch_gtf_transcripts
     )
-
-    // .map {
-    //     meta,
-    // }
-
-    // INPUT_CHECK (
-    //     ch_input
-    // )
-    // .map {
-    //     meta, fastq ->
-    //         meta.id = meta.id.split('_')[0..-2].join('_')
-    //         [ meta, fastq ] }
-    // .groupTuple(by: [0])
-    // .branch {
-    //     meta, fastq ->
-    //         single  : fastq.size() == 1
-    //             return [ meta, fastq.flatten() ]
-    //         multiple: fastq.size() > 1
-    //             return [ meta, fastq.flatten() ]
-    // }
-    // .set { ch_fastq }
 
     emit:
     stringtie_merged_gtf          = STRINGTIE_MERGE.out.gtf                     // path: stringtie.merged.gtf
