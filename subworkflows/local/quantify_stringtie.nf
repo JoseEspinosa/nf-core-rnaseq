@@ -8,11 +8,11 @@ params.stringtie_prepde_options                  = [:]
 params.stringtie_quantify_new_annotation_options = [:]
 params.stringtie_quantify_reference_options      = [:]
 
-include { STRINGTIE_MERGE      } from '../../modules/nf-core/software/stringtie/merge/main' addParams( options: params.stringtie_merge_options )
-include { FORMAT_STRINGTIE_GTF } from '../../modules/local/format_stringtie_gtf'            addParams( options: params.format_stringtie_gtf_options )
-include { STRINGTIE_PREPDE     } from '../../modules/local/stringtie_prepde'                addParams( options: params.stringtie_prepde_options )
-include { STRINGTIE as STRINGTIE_NEW_ANNOTATION } from '../../modules/nf-core/software/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_new_annotation_options )
-include { STRINGTIE as STRINGTIE_REFERENCE      } from '../../modules/nf-core/software/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_reference_options )
+include { STRINGTIE_MERGE      } from '../../modules/nf-core/modules/stringtie/merge/main' addParams( options: params.stringtie_merge_options )
+include { FORMAT_STRINGTIE_GTF } from '../../modules/local/format_stringtie_gtf'           addParams( options: params.format_stringtie_gtf_options )
+include { STRINGTIE_PREPDE     } from '../../modules/local/stringtie_prepde'               addParams( options: params.stringtie_prepde_options )
+include { STRINGTIE as STRINGTIE_NEW_ANNOTATION               } from '../../modules/nf-core/modules/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_new_annotation_options )
+include { STRINGTIE as STRINGTIE_REFERENCE                    } from '../../modules/nf-core/modules/stringtie/stringtie/main' addParams( options: params.stringtie_quantify_reference_options )
 
 workflow QUANTIFY_STRINGTIE {
     take:
@@ -37,36 +37,40 @@ workflow QUANTIFY_STRINGTIE {
         FORMAT_STRINGTIE_GTF.out.gtf
     )
 
-    STRINGTIE_NEW_ANNOTATION
-        .out
-        .transcript_gtf
-        .map {
-            meta, gtf ->
-                meta.id = meta.id + '.new_annotation'
-                [ meta, gtf ]
-        }
-        .set { ch_gtf_new_annotation }
+    ch_gtf_transcripts = STRINGTIE_NEW_ANNOTATION.out.transcript_gtf
+
+    // ch_gtf_new_annotation.map {
+    //         meta, gtf ->
+    //             meta.id = meta.id + '.new_annotation'
+    //             [ meta, gtf ]
+    //     }
+    //     .set { ch_gtf_new_annotation }
 
     STRINGTIE_REFERENCE (
         ch_genome_bam,
         reference_gtf
     )
 
-    STRINGTIE_REFERENCE
-        .out
-        .transcript_gtf
-        .map {
-            meta, gtf ->
-                meta.id = meta.id + '.reference'
-                [ meta, gtf ]
-        }
-        .mix ( ch_gtf_new_annotation )
-        .set { ch_gtf_transcripts }
+    ch_gtf_transcripts = ch_gtf_transcripts.mix (STRINGTIE_REFERENCE.out.transcript_gtf)
 
+    // STRINGTIE_REFERENCE
+    //     .out
+    //     .transcript_gtf
+    //     .map {
+    //         meta, gtf ->
+    //             meta.id = meta.id + '.reference'
+    //             [ meta, gtf ]
+    //     }
+    //     // .mix ( ch_gtf_new_annotation )
+    //     .set { ch_gtf_reference }
+
+    // ch_gtf_transcripts = ch_gtf_new_annotation.mix(ch_gtf_reference)
     // ch_gtf_transcripts.view()
 
     STRINGTIE_PREPDE (
+        // STRINGTIE_REFERENCE.out.transcript_gtf
         ch_gtf_transcripts
+        // ch_gtf_reference
     )
 
     emit:
