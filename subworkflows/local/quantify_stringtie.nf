@@ -24,30 +24,50 @@ workflow QUANTIFY_STRINGTIE {
 
     main:
 
+    //
+    // Merges the gtf files annotated using the bam files with the reference
+    //
     STRINGTIE_MERGE (
         stringtie_gtf,
         reference_gtf
     )
 
+    //
+    // Reformats the merged gtf: gene boundaries and biotypes
+    //
     FORMAT_STRINGTIE_GTF (
         STRINGTIE_MERGE.out.gtf,
         reference_gtf
     )
 
+    //
+    // Quantifies transcript expression of the new annotation
+    //
     STRINGTIE_NEW_ANNOTATION (
         ch_genome_bam,
         FORMAT_STRINGTIE_GTF.out.gtf
     )
 
+    //
+    // Generates the count matrices for genes and transcripts with the output of stringtie quantification
+    // on the new annotated transcripts
+    //
     STRINGTIE_PREPDE_NEW_ANNOTATION (
         STRINGTIE_NEW_ANNOTATION.out.transcript_gtf
     )
 
+    //
+    // Quantifies transcript expression of the reference annotation
+    //
     STRINGTIE_REFERENCE (
         ch_genome_bam,
         reference_gtf
     )
 
+    //
+    // Generates the count matrices for genes and transcripts with the output of stringtie quantification
+    // on only the reference transcripts
+    //
     STRINGTIE_PREPDE_REFERENCE (
         STRINGTIE_REFERENCE.out.transcript_gtf
     )
