@@ -54,7 +54,7 @@ process ASSIGN_FEELNC_BIOTYPE {
                         print \$0
                     }
                 }
-            ' exons."\$biotype".gtf novel.feelnc_biotype.gff > tmp.gff
+            ' feelnc.predicted."\$biotype".gtf novel.feelnc_biotype.gff > tmp.gff
             mv tmp.gff novel.feelnc_biotype.gff
         fi
     done
