@@ -31,7 +31,6 @@ process FEELNC_CODPOT {
 
     script:
     def software = getSoftwareName(task.process)
-    // TODO put options as args (--byotype, --numtx, etc (check if defaults are needed))
     """
     path_to_codpot=\$(which FEELnc_codpot.pl)
     export FEELNCPATH=\${path_to_codpot%/*}/..

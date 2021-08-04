@@ -55,11 +55,15 @@ workflow ANNOTATE_FEELNC {
 
     emit:
     candidate_lncrna_gtf      = FEELNC_FILTER.out.candidate_lncrna_gtf               // path: lncRNA_classes.txt
+    feelnc_filter_log         = FEELNC_FILTER.out.feelncfilter_log                   // path: *feelncfilter.log
     feelnc_filter_version     = FEELNC_FILTER.out.version                            // path: *.version.txt
 
     feelnc_predictions_gtf    = FEELNC_CODPOT.out.feelnc_predictions_gtf             // path: feelnc.predicted.*.gtf
     feelnc_codplot_version    = FEELNC_CODPOT.out.version                            // path: *.version.txt
 
+    feelnc_classification_txt = ASSIGN_FEELNC_BIOTYPE.out.classification_summary_txt // path: feelnc_classification_summary.txt
+
     lncrna_classes            = FEELNC_CLASSIFIER.out.lncrna_classes                 // path: lncRNA_classes.txt
+    feelnc_classifier_log     = FEELNC_CLASSIFIER.out.feelncclassifier_log           // path: *feelncclassifier.log
     feelnc_classifier_version = FEELNC_CLASSIFIER.out.version                        // path: *.version.txt
 }

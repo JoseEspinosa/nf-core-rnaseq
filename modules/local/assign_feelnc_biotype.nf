@@ -23,7 +23,8 @@ process ASSIGN_FEELNC_BIOTYPE {
     path feelnc_predicted_biotypes
 
     output:
-    path "coding_transcripts.gtf", emit: coding_transcripts
+    path "feelnc_classification_summary.txt", emit: classification_summary_txt
+    path "coding_transcripts.gtf",            emit: coding_transcripts
 
     script:
     """

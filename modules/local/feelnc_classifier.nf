@@ -25,8 +25,9 @@ process FEELNC_CLASSIFIER {
     path exons_biotypes
 
     output:
-    path "lncRNA_classes.txt", emit: lncrna_classes
-    path "*.version.txt"     , emit: version
+    path "lncRNA_classes.txt"    , emit: lncrna_classes
+    path '*feelncclassifier.log' , emit: feelncclassifier_log
+    path "*.version.txt"         , emit: version
 
     script:
     def software = getSoftwareName(task.process)

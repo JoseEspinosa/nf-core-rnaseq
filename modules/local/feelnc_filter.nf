@@ -26,6 +26,7 @@ process FEELNC_FILTER {
 
     output:
     path "candidate_lncrna.gtf", emit: candidate_lncrna_gtf
+    path '*feelncfilter.log'   , emit: feelncfilter_log
     path "*.version.txt"       , emit: version
 
     script:
