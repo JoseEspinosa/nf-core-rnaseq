@@ -45,18 +45,21 @@ workflow ANNOTATE_FEELNC {
         FEELNC_CODPOT.out.feelnc_predictions_gtf
     )
 
+    //
+    // Classifies lncRNAs taking into account neighboring genes
+    //
     FEELNC_CLASSIFIER (
         ASSIGN_FEELNC_BIOTYPE.out.coding_transcripts,
         FEELNC_CODPOT.out.feelnc_predictions_gtf
     )
 
     emit:
-    candidate_lncrna_gtf      = FEELNC_FILTER.out.candidate_lncrna_gtf   // path: lncRNA_classes.txt
-    feelnc_filter_version     = FEELNC_FILTER.out.version                //  path: *.version.txt
+    candidate_lncrna_gtf      = FEELNC_FILTER.out.candidate_lncrna_gtf               // path: lncRNA_classes.txt
+    feelnc_filter_version     = FEELNC_FILTER.out.version                            // path: *.version.txt
 
-    feelnc_predictions_gtf    = FEELNC_CODPOT.out.feelnc_predictions_gtf // path: feelnc.predicted.*.gtf
-    feelnc_codplot_version    = FEELNC_CODPOT.out.version                // path: *.version.txt
+    feelnc_predictions_gtf    = FEELNC_CODPOT.out.feelnc_predictions_gtf             // path: feelnc.predicted.*.gtf
+    feelnc_codplot_version    = FEELNC_CODPOT.out.version                            // path: *.version.txt
 
-    lncrna_classes            = FEELNC_CLASSIFIER.out.lncrna_classes     // path: lncRNA_classes.txt
-    feelnc_classifier_version = FEELNC_CLASSIFIER.out.version            // path: *.version.txt
+    lncrna_classes            = FEELNC_CLASSIFIER.out.lncrna_classes                 // path: lncRNA_classes.txt
+    feelnc_classifier_version = FEELNC_CLASSIFIER.out.version                        // path: *.version.txt
 }

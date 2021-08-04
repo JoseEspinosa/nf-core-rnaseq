@@ -91,7 +91,9 @@ workflow QUANTIFY_STRINGTIE {
 
     stringtie_prepde_new_annotation_gene_counts        = STRINGTIE_PREPDE_NEW_ANNOTATION.out.genes_counts_csv       // path: *.genes_counts.csv
     stringtie_prepde_new_annotation_transcripts_counts = STRINGTIE_PREPDE_NEW_ANNOTATION.out.transcripts_counts_csv // path: *.transcripts_counts.csv
+    stringtie_prepde_new_annotation_version            = STRINGTIE_PREPDE_NEW_ANNOTATION.out.version                // path: *.version.txt
 
     stringtie_prepde_reference_gene_counts             = STRINGTIE_PREPDE_REFERENCE.out.genes_counts_csv            // path: *.genes_counts.csv
     stringtie_prepde_reference_transcripts_counts      = STRINGTIE_PREPDE_REFERENCE.out.transcripts_counts_csv      // path: *.transcripts_counts.csv
+    stringtie_prepde_reference_version                 = STRINGTIE_PREPDE_REFERENCE.out.version                     // path: *.version.txt
 }
