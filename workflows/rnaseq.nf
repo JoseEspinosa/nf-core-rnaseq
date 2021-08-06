@@ -56,7 +56,7 @@ ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 ========================================================================================
 */
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_bovreg.yaml", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 // Header files for MultiQC
@@ -542,11 +542,6 @@ workflow RNASEQ {
         ch_software_versions      = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
     }
 
-    ch_feelnc_filter_multiqc         = Channel.empty()
-    ch_feelnc_classification_multiqc = Channel.empty()
-    ch_feelnc_classes_multiqc        = Channel.empty()
-    ch_feelnc_classifier_multiqc     = Channel.empty()
-
     //
     // MODULE: STRINGTIE
     //
@@ -583,11 +578,6 @@ workflow RNASEQ {
                 PREPARE_GENOME.out.gtf,
                 PREPARE_GENOME.out.fasta
             )
-
-            ch_feelnc_filter_multiqc         = ANNOTATE_FEELNC.out.feelnc_filter_log
-            ch_feelnc_classification_multiqc = ANNOTATE_FEELNC.out.feelnc_classification_txt
-            ch_feelnc_classes_multiqc        = ANNOTATE_FEELNC.out.lncrna_classes
-            ch_feelnc_classifier_multiqc     = ANNOTATE_FEELNC.out.feelnc_classifier_log
             ch_software_versions             = ch_software_versions.mix(ANNOTATE_FEELNC.out.feelnc_filter_version.ifEmpty(null))
             ch_software_versions             = ch_software_versions.mix(ANNOTATE_FEELNC.out.feelnc_codplot_version.ifEmpty(null))
             ch_software_versions             = ch_software_versions.mix(ANNOTATE_FEELNC.out.feelnc_classifier_version.ifEmpty(null))
@@ -788,10 +778,6 @@ workflow RNASEQ {
             ch_samtools_flagstat.collect{it[1]}.ifEmpty([]),
             ch_samtools_idxstats.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_feelnc_filter_multiqc.collect().ifEmpty([]),
-            ch_feelnc_classification_multiqc.collect().ifEmpty([]),
-            ch_feelnc_classes_multiqc.collect().ifEmpty([]),
-            ch_feelnc_classifier_multiqc.collect().ifEmpty([]),
             ch_featurecounts_multiqc.collect{it[1]}.ifEmpty([]),
             ch_aligner_pca_multiqc.collect().ifEmpty([]),
             ch_aligner_clustering_multiqc.collect().ifEmpty([]),
