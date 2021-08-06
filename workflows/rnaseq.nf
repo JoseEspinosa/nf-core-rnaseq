@@ -563,12 +563,6 @@ workflow RNASEQ {
             )
         }
 
-        ch_software_versions = ch_software_versions.mix(QUANTIFY_STRINGTIE.out.stringtie_new_annotation_version.first().ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(QUANTIFY_STRINGTIE.out.stringtie_reference_version.ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(QUANTIFY_STRINGTIE.out.stringtie_reference_version.ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(QUANTIFY_STRINGTIE.out.stringtie_prepde_new_annotation_version.ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(QUANTIFY_STRINGTIE.out.stringtie_prepde_reference_version.ifEmpty(null))
-
         //
         // SUBWORKFLOW: Predict lncrna using FEELNC
         //
@@ -578,8 +572,6 @@ workflow RNASEQ {
                 PREPARE_GENOME.out.gtf,
                 PREPARE_GENOME.out.fasta
             )
-            ch_software_versions             = ch_software_versions.mix(ANNOTATE_FEELNC.out.feelnc_filter_version.ifEmpty(null))
-            ch_software_versions             = ch_software_versions.mix(ANNOTATE_FEELNC.out.feelnc_codplot_version.ifEmpty(null))
             ch_software_versions             = ch_software_versions.mix(ANNOTATE_FEELNC.out.feelnc_classifier_version.ifEmpty(null))
         }
     }
